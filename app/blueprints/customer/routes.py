@@ -10,6 +10,7 @@ from app.utils.util import encode_token, role_required, token_required
 
 from . import customer_bp
 from .schemas import (
+    creation_response_schema,
     customer_schema,
     login_schema,
     mechanic_view_customers_schema,
@@ -23,9 +24,9 @@ def login():
         credentials = login_schema.load(request.json)
         username = credentials["email"]
         password = credentials["password"]
-    except (KeyError, ValueError, ValidationError) as e:
+    except (KeyError, ValueError, ValidationError):
         return jsonify(
-            {"message": f"{e} - Username and password required."},
+            {"message": "Username and password required."},
         ), 400
 
     query = select(Customer).where(Customer.email == username)
@@ -34,8 +35,8 @@ def login():
     ).scalar_one_or_none()  # Query customer table for a customer with this email
 
     # soft deleted customers are not allowed to log in
-    if not customer or customer.soft_delete:
-        return jsonify({"message": "User previously deleted!"}), 401
+    if not customer or (customer and customer.soft_delete):
+        return jsonify({"error": "Invalid email or password!"}), 401
 
     # if we have a customer associated with the customername, validate the password
     if customer and customer.password == password:
@@ -47,7 +48,7 @@ def login():
             "auth_token": auth_token,
         }
         return jsonify(response), 200
-    return jsonify({"message": "Invalid email or password!"}), 401
+    return jsonify({"error": "Invalid email or password!"}), 401
 
 
 @customer_bp.route("/", methods=["POST"])
@@ -56,43 +57,27 @@ def create_customer():
     try:
         customer_data = customer_schema.load(request.json)
     except ValidationError as e:
-        return jsonify(e.message), 400
+        return jsonify(
+            {"message": f"{e.messages} - Username and password required."},
+        ), 400
 
     query = select(Customer).where(
         Customer.email == customer_data["email"],
     )  # Checking our db for a customer with this email
-    existing_customer = db.session.execute(query).scalars().all()
+    existing_customer = db.session.execute(query).one_or_none()
 
     # opted to handle potential IntegrityError with simple error handling
     if existing_customer:
-        return jsonify({"error": "Email already associated with an account."}), 400
+        return jsonify({"error": "Email already associated with an account."}), 401
 
     new_customer = Customer(**customer_data)
 
     db.session.add(new_customer)
     db.session.commit()
-    return customer_schema.jsonify(new_customer), 201
+    return creation_response_schema.jsonify(new_customer), 201
 
 
-# admin can look up customer by id
-@customer_bp.route("/<int:customer_id>", methods=["GET"])
-@cache.cached(timeout=10)
-@role_required
-def get_customer(customer_id):
-    customer = db.session.get(Customer, customer_id)
-
-    if customer:
-        return customer_schema.jsonify(customer), 200
-    return jsonify({"error": "Customer not found."}), 400
-
-
-@customer_bp.route("/", methods=["GET"])
-# needs admin blueprint, this should be protected by admin role
-# @cache.cached(timeout=30)
-def get_customers():
-    return get_all(Customer, mechanic_view_customers_schema)
-
-
+# ==================== CUSTOMER TOKEN REQUIRED =========================
 @customer_bp.route("/", methods=["PUT"])
 @limiter.limit("6 per day")
 @token_required
@@ -105,13 +90,15 @@ def update_customer(customer_id):
     try:
         customer_data = customer_schema.load(request.json)
     except ValidationError as e:
-        return jsonify({"message": f"{e}"}), 400
+        return jsonify(
+            {"message": f"{e.messages} - all customer data required."},
+        ), 400
 
     for key, value in customer_data.items():
         setattr(customer, key, value)
 
     db.session.commit()
-    return customer_schema.jsonify(customer), 200
+    return creation_response_schema.jsonify(customer), 200
 
 
 # dummy delete, should also soft_delete if any service tickets are within the last tax-year
@@ -123,7 +110,7 @@ def soft_delete_customer(customer_id):
     customer = db.session.get(Customer, customer_id)
 
     if not customer:
-        return jsonify({"error": "Customer not found."}), 400
+        return jsonify({"error": "Customer not found."}), 404
 
     customer.soft_delete = True
     db.session.commit()
@@ -132,3 +119,24 @@ def soft_delete_customer(customer_id):
             "message": "Customer successfully marked for deletion",
         },
     ), 200
+
+
+# ===================== MECHANIC/ADMIN TOKEN REQUIRED =====================
+# needs admin blueprint, this should be protected by admin role
+@customer_bp.route("/", methods=["GET"])
+# @cache.cached(timeout=30)
+@role_required
+def get_customers():
+    return get_all(Customer, mechanic_view_customers_schema)
+
+
+# admin can look up customer by id
+@customer_bp.route("/<int:customer_id>", methods=["GET"])
+@cache.cached(timeout=10)
+@role_required
+def get_customer(customer_id):
+    customer = db.session.get(Customer, customer_id)
+
+    if customer:
+        return customer_schema.jsonify(customer), 200
+    return jsonify({"error": "Customer not found."}), 404
