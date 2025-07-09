@@ -60,7 +60,7 @@ paths:
   /customers/:
     post:
       tags:
-        - Customers
+        - Customers - Method Protection -> Customer Token
       summary: "Create Customer"
       description: "Data object requires: name, email (*must be unique*), phone number (*11 character limit*) and password.\n*Limited to 5 per day*"
       parameters:
@@ -85,7 +85,7 @@ paths:
         400:
           description: "Required data missing from body"
           schema: 
-            $ref: "#/definitions/LoginMessage"
+            $ref: "#/definitions/Customer400Message"
             example:
               application/json:
                 {
@@ -103,7 +103,7 @@ paths:
 
     put:
       tags:
-      - Customers
+      - Customers - Method Protection -> Customer Token
       summary: "Change customer data - PROTECTED METHOD - add 'Bearer ' and paste in the token"
       description: "Customer id based on bearer token decode payload, Logged-in customer can change their data.\n*Change some data to test - Limit 6 per day*"
       
@@ -116,27 +116,28 @@ paths:
           description: "Customer data"
           required: true
           schema:
-            $ref: "#/definitions/CreateCustomerPayload"
+            $ref: ""
             example:
               {
                 "name": "Kyle",
-                "email": "kyle@gmail.com",
-                "password": "test",
-                "phone": "9999999999"
+                "email": "",
+                "password": "",
+                "phone": "9876543210"
               }
       
       responses:
         200:
           description: "Change successful"
           schema:
-            $ref: "#/definitions/CreateCustomerResponse"
+            $ref: ""
             example:
+              description: "Uppercase name field, and updated phone number"
               application/json:
                 {
                   "name": "Kyle",
                   "email": "kyle@gmail.com",
                   "password": "test",
-                  "phone": "9999999999"
+                  "phone": "98765443210"
                 }
         400:
           description: "Validation error - if no phone data is present in request"
@@ -145,11 +146,11 @@ paths:
             example:
               application/json:
                 {
-                  "message": "{'phone': ['Missing data for required field.']} - all customer data required."
+                  "message": "{'phone': ['Missing data for required field.']} - all customer data fields required."
                 }
     delete:
       tags:
-      - Customers
+      - Customers - Method Protection -> Customer Token
       summary: "Soft delete customers - PROTECTED METHOD - add 'Bearer ' and paste in the token"
       description: "Set soft_delete parameter to 1 (true) - limit: 5 per day\n*NOTE: soft delete used to keep records for tax year or longer if recallable parts used in repair.*"
       
@@ -180,7 +181,7 @@ paths:
     
     get:
       tags:
-        - Customers
+        - Customers - Method Protection -> Mechanic Token
       summary: "Get All Customers - PROTECTED METHOD - add 'Bearer ' and paste in the mechanic token"
       description: "Mechanics/Admin only\n *Example* /customers/?page=1&per_page=5"
 
@@ -220,20 +221,20 @@ paths:
   /customers/{customer_id}:
     get:
       tags:
-        - Customers
+        - Customers - Method Protection -> Mechanic Token
       summary: "Get customer by id number - PROTECTED METHOD - add 'Bearer ' and paste in the mechanic token"
       description: "Mechanic route to get customer by id"
 
       security:
         - bearerAuth: []
-      
+
       parameters:
         - in: path
           name: customer_id
           type: integer
           required: true
           description: "The customer ID number"
-      
+
       responses:
         200:
           description: "Customer data shown in a successful response"
@@ -255,8 +256,36 @@ paths:
               application/json:
                 {"error": "Customer not found"}
 
+  /customers/my-account:
+    get:
+      tags:
+        - Customers - Method Protection -> Customer Token
+      summary: "Get customer by customer token - PROTECTED METHOD - add 'Bearer ' and paste in the customer token"
+      description: "Customer route to view their data."
 
+      security:
+        - bearerAuth: []
 
+      responses:
+        200:
+          description: "Customer data upon succesful response"
+          schema:
+            $ref: "#/definitions/CreateCustomerResponse"
+            example:
+              application/json:
+                {
+                  "name": "Kyle",
+                  "email": "kyle@gmail.com",
+                  "password": "test",
+                  "phone": "0123456789"
+                }
+        404:
+          description: "Customer not found"
+          schema:
+            $ref: "#/definitions/Customer404Error"
+            example:
+              application/json:
+                {"error": "Customer not found"}
 
 definitions: 
   LoginCredentials:
@@ -304,7 +333,7 @@ definitions:
       error:
         type: "string"
     example:
-      error: "Email already associated with an account."
+      error: "Invalid email or password!"
 
   CreateCustomerPayload:
     type: "object"
@@ -410,7 +439,7 @@ definitions:
       message:
         type: "string"
     example:
-      message: "'error details' all customer data required"
+      message: "'error details' - all customer data fields required."
 
   Customer404Error:
     type: object
@@ -436,3 +465,5 @@ securityDefinitions:
     name: Authorization
     in: header
     bearerFormat: JWT
+    
+  

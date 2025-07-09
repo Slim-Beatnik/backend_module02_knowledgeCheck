@@ -13,7 +13,7 @@ ROLE_SPECIFIC_TIMEOUT = {
 }
 
 
-def encode_token(user_id, role):
+def encode_token(user_id, role="customer"):
     payload = {
         "exp": datetime.now(UTC) + timedelta(hours=ROLE_SPECIFIC_TIMEOUT.get(role, 1)),
         "iat": datetime.now(UTC),

@@ -8,7 +8,10 @@ class DevelopmentConfig:
 
 
 class TestingConfig:
-    pass
+    SQLALCHEMY_DATABASE_URI = "sqlite:///testing.db"
+    SQLALCHEMY_ENGINE_OPTIONS = {"connect_args": {"check_same_thread": False}}  # noqa: RUF012
+    DEBUG = True
+    CACHE_TYPE = "SimpleCache"
 
 
 class ProductionConfig:

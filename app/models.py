@@ -12,6 +12,14 @@ class Base(DeclarativeBase):
 
 db = SQLAlchemy(model_class=Base)
 
+
+# constraint added dynamically into ServiceTickets w/i __init__.create_app()
+def get_vin_length_constraint(dialect_name):
+    if dialect_name == "sqlite":
+        return CheckConstraint("LENGTH(vin) = 17", name="check_vin_length_sqlite")
+    return CheckConstraint("CHAR_LENGTH(vin) = 17", name="check_vin_length_mysql")
+
+
 # ============= MODELS ===============================================================
 # order: Customer -> ServiceTickets -> Mechanics
 
@@ -100,10 +108,6 @@ class ServiceTickets(Base):
     inventories: Mapped[list["Inventory"]] = db.relationship(
         secondary="service_tickets_has_inventories",
         back_populates="service_tickets",
-    )
-
-    __table_args__ = (
-        CheckConstraint("CHAR_LENGTH(vin) = 17", name="check_vin_length"),
     )
 
 

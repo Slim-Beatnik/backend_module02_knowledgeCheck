@@ -13,6 +13,7 @@ from .schemas import (
     creation_response_schema,
     customer_schema,
     login_schema,
+    mechanic_view_customer_schema,
     mechanic_view_customers_schema,
 )
 
@@ -58,7 +59,7 @@ def create_customer():
         customer_data = customer_schema.load(request.json)
     except ValidationError as e:
         return jsonify(
-            {"message": f"{e.messages} - Username and password required."},
+            {"message": f"{e.messages} - all customer data required."},
         ), 400
 
     query = select(Customer).where(
@@ -89,13 +90,16 @@ def update_customer(customer_id):
 
     try:
         customer_data = customer_schema.load(request.json)
+        if not any(customer_data.values()):
+            return jsonify({"message": "No changes made"})
     except ValidationError as e:
         return jsonify(
-            {"message": f"{e.messages} - all customer data required."},
+            {"message": f"{e.messages} - all customer data fields required."},
         ), 400
 
     for key, value in customer_data.items():
-        setattr(customer, key, value)
+        if value:
+            setattr(customer, key, value)
 
     db.session.commit()
     return creation_response_schema.jsonify(customer), 200
@@ -121,6 +125,16 @@ def soft_delete_customer(customer_id):
     ), 200
 
 
+@customer_bp.route("/my-account", methods=["GET"])
+@token_required
+def get_current_customer(customer_id):
+    customer = db.session.get(Customer, customer_id)
+
+    if customer:
+        return creation_response_schema.jsonify(customer), 200
+    return jsonify({"error": "Customer not found."}), 404
+
+
 # ===================== MECHANIC/ADMIN TOKEN REQUIRED =====================
 # needs admin blueprint, this should be protected by admin role
 @customer_bp.route("/", methods=["GET"])
@@ -138,5 +152,5 @@ def get_customer(customer_id):
     customer = db.session.get(Customer, customer_id)
 
     if customer:
-        return customer_schema.jsonify(customer), 200
+        return mechanic_view_customer_schema.jsonify(customer), 200
     return jsonify({"error": "Customer not found."}), 404
