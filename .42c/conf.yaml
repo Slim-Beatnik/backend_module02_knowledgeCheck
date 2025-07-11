@@ -1,0 +1,3 @@
+apis:
+  app/static/openapi.yaml:
+    alias: example.com

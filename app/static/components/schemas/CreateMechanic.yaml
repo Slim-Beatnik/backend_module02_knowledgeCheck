@@ -1,0 +1,20 @@
+Mechanicyload:
+  type: "object"
+  properties:
+    name:
+      type: "string"
+    email:
+      type: "string"
+    password:
+      type: "string"
+    phone:
+      type: "string"
+      maxLength: 11
+    salary:
+      type: "integer"
+  example:
+    name: "ed"
+    email: "ed@repairshop.com"
+    phone: "9719719711"
+    password: "test1"
+    salary: 199999.34

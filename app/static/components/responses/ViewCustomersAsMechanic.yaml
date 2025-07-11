@@ -1,0 +1,42 @@
+type: array
+description: 'pagination optional via ?page=*integer*&per_page=*integer*'
+items:
+  $ref: '../components/responses/ViewCustomerAsMechanic.yaml'
+example:
+  [
+    {
+      'email': 'kyle@gmail.com',
+      'id': 1,
+      'name': 'kyle',
+      'phone': '9714175138',
+      'soft_delete': false
+    },
+    {
+      'email': 'revel@gmail.com',
+      'id': 2,
+      'name': 'rev',
+      'phone': '5033286403',
+      'soft_delete': true
+    },
+    {
+      'email': 'ace@gmail.com',
+      'id': 3,
+      'name': 'aeslin',
+      'phone': '9713403030',
+      'soft_delete': false
+    },
+    {
+      'email': 'dummy@gmail.com',
+      'id': 4,
+      'name': 'dummy',
+      'phone': '5033286403',
+      'soft_delete': false
+    },
+    {
+      'email': 'jaime@gmail.com',
+      'id': 5,
+      'name': 'jaime',
+      'phone': '1234567890',
+      'soft_delete': false
+    }
+  ]

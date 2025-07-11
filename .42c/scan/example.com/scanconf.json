@@ -1,0 +1,424 @@
+{
+    "version": "2.0.0",
+    "runtimeConfiguration": {
+        "environment": "default",
+        "laxTestingModeEnabled": false,
+        "apiConnectivityCheck": true,
+        "logLevel": "error",
+        "logDestination": "stdout+platform",
+        "logMaxFileSize": 2147483648,
+        "requestHeaderNameRequestId": "x-scan-request-id",
+        "requestHeaderNameScenarioId": "x-scan-scenario-id",
+        "requestHeaderNameRequestType": "x-scan-request-type",
+        "requestFlowrate": 100,
+        "requestTimeout": 30,
+        "requestTlsInsecureSkipVerify": true,
+        "responseFollowRedirection": false,
+        "responseMaxBodySizeScan": 10485760,
+        "happyPathOnly": false,
+        "maxRequestRetryAttempts": 5,
+        "maxScanDuration": 1800,
+        "memoryLimit": 2147483648,
+        "memoryTimeSpan": 10,
+        "reportMaxRequestSizeHappyPath": 8092,
+        "reportMaxRequestSizeTest": 8092,
+        "reportIncludeRequestBody": true,
+        "reportIncludeResponseBody": true,
+        "reportMaxHttpResponseSizeHappyPath": 8092,
+        "reportMaxBodySizeHappyPath": 8092,
+        "reportMaxHttpResponseSizeTest": 8092,
+        "reportMaxBodySizeTest": 8092,
+        "reportIssuesOnly": false,
+        "reportMaxIssues": 1000,
+        "reportMaxSize": 20971520,
+        "reportGenerateCurlCommand": true,
+        "normalizeServerUrls": true
+    },
+    "customizations": {
+        "happyPaths": {
+            "retry": 1,
+            "responsePolicy": {
+                "httpStatusExpected": true,
+                "mustBeConformant": true
+            },
+            "httpStatusExpected": []
+        },
+        "tests": {
+            "responsePolicy": {
+                "httpStatusExpected": true,
+                "mustBeConformant": true
+            }
+        }
+    },
+    "authenticationDetails": [
+        {
+            "api_key": {
+                "type": "apiKey",
+                "in": "header",
+                "name": "api_key",
+                "default": "api_key",
+                "credentials": {
+                    "api_key": {
+                        "description": "api_key security",
+                        "credential": "{{api_key}}"
+                    }
+                }
+            },
+            "basic_auth": {
+                "type": "basic",
+                "default": "basic_auth",
+                "credentials": {
+                    "basic_auth": {
+                        "description": "basic_auth security",
+                        "credential": "{{basic_auth}}"
+                    }
+                }
+            },
+            "main_auth": {
+                "type": "oauth2",
+                "default": "main_auth",
+                "credentials": {
+                    "main_auth": {
+                        "description": "main_auth security",
+                        "credential": "{{main_auth}}"
+                    }
+                }
+            }
+        }
+    ],
+    "operations": {
+        "echo": {
+            "operationId": "echo",
+            "scenarios": [
+                {
+                    "key": "happy.path",
+                    "fuzzing": true,
+                    "requests": [
+                        {
+                            "$ref": "#/operations/echo/request",
+                            "fuzzing": true
+                        }
+                    ]
+                }
+            ],
+            "request": {
+                "operationId": "echo",
+                "auth": [
+                    "api_key"
+                ],
+                "request": {
+                    "type": "42c",
+                    "details": {
+                        "url": "{{host}}/echo",
+                        "method": "POST",
+                        "headers": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "requestBody": {
+                            "mode": "json",
+                            "json": "Hello world!"
+                        }
+                    }
+                },
+                "defaultResponse": "200",
+                "responses": {
+                    "200": {
+                        "expectations": {
+                            "httpStatus": 200
+                        }
+                    }
+                }
+            }
+        },
+        "getUserByName": {
+            "operationId": "getUserByName",
+            "scenarios": [
+                {
+                    "key": "happy.path",
+                    "fuzzing": true,
+                    "requests": [
+                        {
+                            "$ref": "#/operations/getUserByName/request",
+                            "fuzzing": true
+                        }
+                    ]
+                }
+            ],
+            "request": {
+                "operationId": "getUserByName",
+                "auth": [
+                    "main_auth"
+                ],
+                "request": {
+                    "type": "42c",
+                    "details": {
+                        "url": "{{host}}/users/{username}",
+                        "method": "GET",
+                        "paths": [
+                            {
+                                "key": "username",
+                                "value": "qjhleytrvfouhhxkcgzcdbifbwymlidz"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "key": "pretty_print",
+                                "value": false
+                            },
+                            {
+                                "key": "with_email",
+                                "value": true
+                            }
+                        ]
+                    }
+                },
+                "defaultResponse": "200",
+                "responses": {
+                    "200": {
+                        "expectations": {
+                            "httpStatus": 200
+                        }
+                    },
+                    "403": {
+                        "expectations": {
+                            "httpStatus": 403
+                        }
+                    },
+                    "404": {
+                        "expectations": {
+                            "httpStatus": 404
+                        }
+                    }
+                }
+            }
+        },
+        "operationId": {
+            "operationId": "operationId",
+            "scenarios": [
+                {
+                    "key": "happy.path",
+                    "fuzzing": true,
+                    "requests": [
+                        {
+                            "$ref": "#/operations/operationId/request",
+                            "fuzzing": true
+                        }
+                    ]
+                }
+            ],
+            "request": {
+                "operationId": "operationId",
+                "auth": [
+                    "api_key"
+                ],
+                "request": {
+                    "type": "42c",
+                    "details": {
+                        "url": "{{host}}/pathItem",
+                        "method": "POST",
+                        "headers": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "requestBody": {
+                            "mode": "json",
+                            "json": {
+                                "booleanProperty": true,
+                                "integer32bit": 1464071146937974437,
+                                "integer64bit": 8209720937289081480,
+                                "integerType": 6759235853702179962,
+                                "maxLengthString": "example",
+                                "minAndMaxLengthString": "example",
+                                "minLengthString": "example",
+                                "numberDouble": 1.1105549837092565e+38,
+                                "numberFloat": 1.0120427033811904e+38,
+                                "numberGreaterThan": 2.854480255728384e+38,
+                                "numberGreaterThanOrEquals": 2.481662867963695e+38,
+                                "numberLessThan": 2.998241797098532e+38,
+                                "numberLessThanOrEquals": 6.330882593650112,
+                                "numberProperty": 8,
+                                "numberRange": 5.051282778002269,
+                                "numberRangeExclusiveMaximum": 1.6589479271988986e+38,
+                                "numberRangeExclusiveMinimumAndMaximum": 2.3072460151031464e+38,
+                                "stringDate": "eiiijpyzrojovcnlqyqbwjmtwuuzcypy",
+                                "stringDateTime": "trntmhnmbtjiavdqonvwnkfeohsjnrea",
+                                "stringEmail": "giocidfdghaczpjpqbiblyaqfmhvrbuo",
+                                "stringEnumValues": "sample",
+                                "stringHostname": "eztolgbgwhttqhohsvqlhdchowwgjvnr",
+                                "stringIpAddressV4": "riicqchsaruhfficwxyibwuslewgwbzl",
+                                "stringIpAddressV6": "bpewivdlkrieocfjahtmonnfdzbbpssc",
+                                "stringPassword": "llyfgvtuxjqfjxgmuwqisndqpwejrtdx",
+                                "stringProperty": "example",
+                                "stringUri": "exjsxaiwevuiwbpozwlhbcpxxllvjsys",
+                                "stringUuid": "qqncuzpcycnhlekgtxweueiaquuiaysv",
+                                "writeOnlyStringProperty": "example"
+                            }
+                        }
+                    }
+                },
+                "defaultResponse": "200",
+                "responses": {
+                    "200": {
+                        "expectations": {
+                            "httpStatus": 200
+                        }
+                    }
+                }
+            }
+        },
+        "postPathItemWithExamples": {
+            "operationId": "postPathItemWithExamples",
+            "scenarios": [
+                {
+                    "key": "happy.path",
+                    "fuzzing": true,
+                    "requests": [
+                        {
+                            "$ref": "#/operations/postPathItemWithExamples/request",
+                            "fuzzing": true
+                        }
+                    ]
+                }
+            ],
+            "request": {
+                "operationId": "postPathItemWithExamples",
+                "auth": [
+                    "api_key"
+                ],
+                "request": {
+                    "type": "42c",
+                    "details": {
+                        "url": "{{host}}/pathItemWithExamples",
+                        "method": "POST",
+                        "headers": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "requestBody": {
+                            "mode": "json",
+                            "json": {
+                                "stringProperty": "tada"
+                            }
+                        }
+                    }
+                },
+                "defaultResponse": "200",
+                "responses": {
+                    "200": {
+                        "expectations": {
+                            "httpStatus": 200
+                        }
+                    }
+                }
+            }
+        },
+        "updateUser": {
+            "operationId": "updateUser",
+            "scenarios": [
+                {
+                    "key": "happy.path",
+                    "fuzzing": true,
+                    "requests": [
+                        {
+                            "$ref": "#/operations/updateUser/request",
+                            "fuzzing": true
+                        }
+                    ]
+                }
+            ],
+            "request": {
+                "operationId": "updateUser",
+                "auth": [
+                    "main_auth"
+                ],
+                "request": {
+                    "type": "42c",
+                    "details": {
+                        "url": "{{host}}/users/{username}",
+                        "method": "PUT",
+                        "paths": [
+                            {
+                                "key": "username",
+                                "value": "dltpgpxlkjffcdayupbgdywemfkasqhp"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "key": "pretty_print",
+                                "value": true
+                            }
+                        ],
+                        "headers": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "requestBody": {
+                            "mode": "json",
+                            "json": {
+                                "email": "john.smith@example.com",
+                                "firstName": "John",
+                                "lastName": "Smith",
+                                "username": "John78"
+                            }
+                        }
+                    }
+                },
+                "defaultResponse": "200",
+                "responses": {
+                    "200": {
+                        "expectations": {
+                            "httpStatus": 200
+                        }
+                    },
+                    "400": {
+                        "expectations": {
+                            "httpStatus": 400
+                        }
+                    },
+                    "404": {
+                        "expectations": {
+                            "httpStatus": 404
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "environments": {
+        "default": {
+            "variables": {
+                "api_key": {
+                    "from": "environment",
+                    "name": "SCAN42C_SECURITY_API_KEY",
+                    "required": true
+                },
+                "basic_auth": {
+                    "from": "environment",
+                    "name": "SCAN42C_SECURITY_BASIC_AUTH",
+                    "required": false,
+                    "default": "secret_to_be_overridden"
+                },
+                "host": {
+                    "from": "environment",
+                    "name": "SCAN42C_HOST",
+                    "required": false,
+                    "default": "http://example.com/api/v1"
+                },
+                "main_auth": {
+                    "from": "environment",
+                    "name": "SCAN42C_SECURITY_MAIN_AUTH",
+                    "required": true
+                }
+            }
+        }
+    }
+}

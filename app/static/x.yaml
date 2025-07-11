@@ -1,0 +1,580 @@
+# swagger: "2.0"
+# info:
+#   title: "Repair Shop Database"
+#   description: "Mock mechanic shop db"
+#   version: "1.2.0"
+# schemes:
+# - "http"
+# host: "127.0.0.1:5000"
+# consumes:
+#   - "application/json"
+# produces:
+#   - "application/json"
+
+# paths:
+  
+    
+#     get:
+#       tags:
+#         - Customers - Method Protection -> Mechanic Token
+#       summary: "Get All Customers - PROTECTED METHOD - add 'Bearer ' and paste in the mechanic token"
+#       description: "Mechanics/Admin only\n *Example* /customers/?page=1&per_page=5"
+
+#       security:
+#         - bearerAuth: []
+
+#       parameters:
+#         - in: query
+#           name: page
+#           type: integer
+#           required: false
+#         - in: query
+#           name: per_page
+#           type: integer
+#           required: false
+
+#       responses:
+#         200:
+#           description: "All customers view for mechanics, pagination is optional, "
+#           schema:
+#             $ref: "#/definitions/ViewCustomersAsMechanic"
+#             example:
+#               application/json:
+#                 [{
+#                   "id": 1,
+#                   "name": "Kyle",
+#                   "email": "kyle@gmail.com",
+#                   "phone": "0123456789"
+#                 },
+#                 {
+#                   "id": integer,
+#                   "name": "Rev",
+#                   "email": "rev@gmail.com",
+#                   "phone": "1234567890"
+#                 }]
+
+#   /customers/{customer_id}:
+#     get:
+#       tags:
+#         - Customers - Method Protection -> Mechanic Token
+#       summary: "Get customer by id number - PROTECTED METHOD - add 'Bearer ' and paste in the mechanic token"
+#       description: "Mechanic route to get customer by id"
+
+#       security:
+#         - bearerAuth: []
+
+#       parameters:
+#         - in: path
+#           name: customer_id
+#           type: integer
+#           required: true
+#           description: "The customer ID number"
+
+#       responses:
+#         200:
+#           description: "Customer data shown in a successful response"
+#           schema:
+#             $ref: "#/definitions/ViewCustomerAsMechanic"
+#             example:
+#               application/json:
+#                 {
+#                   "id": integer,
+#                   "name": "Kyle",
+#                   "email": "kyle@gmail.com",
+#                   "phone": "0123456789"
+#                 }
+#         404:
+#           description: "Customer not found"
+#           schema:
+#             $ref: "#/definitions/Customer404Error"
+#             example:
+#               application/json:
+#                 {"error": "Customer not found"}
+
+#   /customers/my-account:
+
+
+#   # =================== MECHANICS =====================
+#   /mechanics/login:
+#     post:
+#       tags:
+#         - Mechanics
+#       summary: "Login endpoint, (generates token)"
+#       description: "Validates mechanic credentials, generates and return a mechanic specific token. *Token times out in 8 hour*"
+#       parameters:
+#         - in: "body"
+#           name: "body"
+#           description: "Login Credentials"
+#           required: true
+#           schema:
+#             example:
+#               application/json:
+#                 {
+#                   "email": "ed@repairshop.com",
+#                   "password": "test1"
+#                 }
+#       responses:
+#         200:
+#           description: "Login successful"
+#           schema:
+#             example:
+#               application/json:
+#                 {
+#                   "auth_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTIxMjAxMDYsImlhdCI6MTc1MjA5MTMwNiwic3ViIjoiMSIsInJvbGUiOiJtZWNoYW5pYyJ9.s6_GNYDNPoG6GGSzCSpt5zIWX9NwyEituAX9byIx038",
+#                   "message": "Successfully Logged In",
+#                   "status": "success"
+#                 }
+#         400:
+#           description: "Required data missing from body"
+#           schema:
+#             $ref: "#/definitions/LoginMessage"
+#             example:
+#                 {
+#                   "message": "Username and password required."
+#                 }
+#         401:
+#           description: "Email or Password not found to match"
+#           schema:
+#             $ref: "#/definitions/LoginError"
+#             example:
+#               application/json:
+#                 {
+#                   "error": "Invalid email or password!"
+#                 }
+
+#   /mechanics/:
+#     post:
+#       tags:
+#         - Mechanics
+#       summary: "Create Mechanic"
+#       description: "Data object requires: name, email (*must be unique*), phone number (*11 max character limit*), salary, and password."
+#       parameters:
+#         - in: "body"
+#           name: "body"
+#           required: true
+#           schema:
+#             $ref: "#/definitions/CreateMechanicPayload"
+#       responses:
+#         201:
+#           description: "Mechanic creation successful"
+#           schema:
+#             $ref: "#/definitions/CreateMechanicResponse"
+#             example:
+#               application/json:
+#                 {
+#                   "id": 1,
+#                   "name": "ed",
+#                   "email": "ed@repairshop.com",
+#                   "phone": "9719719711",
+#                   "password": "test1",
+#                   "salary": 199999.34
+#                 }
+#         400:
+#           description: "Required data missing from body"
+#           schema: 
+#             $ref: "#/definitions/Mechanic400Message"
+#         401:
+#           description: "Email already associated with account - same email as first example. \n*Note* Testing duplicate email will reduce number of attempts per limiter"
+#           schema:
+#             $ref: "#/definitions/LoginError"
+#             example:
+#               application/json:
+#                 {
+#                   "error": "Email already associated with an account."
+#                 }
+
+#     put:
+#       tags:
+#       - Mechanics - Method Protection -> Mechanic Token
+#       summary: "Change mechanic data - PROTECTED METHOD - add 'Bearer ' and paste in the token"
+#       description: "Mechanic id based on bearer token decode payload, Logged-in mechanic can change their data.\n*Change some data to test - Limit 6 per day*"
+      
+#       security:
+#         - bearerAuth: []
+      
+#       parameters:
+#         - in: "body"
+#           name: "body"
+#           description: "Mechanic data"
+#           required: true
+#           schema:
+#             $ref: ""
+#             example:
+#               {
+#                 "name": "Edward",
+#                 "email": "ed@repairshop.com",
+#                 "phone": "1010101010",
+#                 "password": "test1",
+#                 "salary": 199999.34
+#               }
+      
+#       responses:
+#         200:
+#           description: "Change successful"
+#           schema:
+#             $ref: ""
+#             example:
+#               description: "Uppercase name field, and updated phone number"
+#               application/json:
+#                 {
+#                   "name": "Edward",
+#                   "email": "ed@repairshop.com",
+#                   "phone": "1010101010",
+#                   "password": "test1",
+#                   "salary": 199999.34
+#                 }
+#         400:
+#           description: "Validation error - if no phone data is present in request"
+#           schema:
+#             $ref: "#/definitions/Customer400Message"
+#             example:
+#               application/json:
+#                 {
+#                   "message": "{'phone': ['Missing data for required field.']} - all mechanic data fields required."
+#                 }
+#     delete:
+#       tags:
+#       - Mechanics - Method Protection -> Mechanic Token
+#       summary: "Soft delete mechanics - PROTECTED METHOD - add 'Bearer ' and paste in the token"
+#       description: "Set soft_delete parameter to 1 (true) - limit: 5 per day\n*NOTE: soft delete used to keep records for tax year or longer if recallable parts used in repair.*"
+      
+#       security:
+#         - bearerAuth: []
+
+#       parameters: []
+
+#       responses:
+#         200:
+#           description: "Mechanic successfully marked for deletion"
+#           schema:
+#             $ref: "#/definitions/MechanicDeleteResponse"
+#             example:
+#               application/json:
+#                 {
+#                   "message": "Mechanic successfully marked for deletion"
+#                 }
+#         404:
+#           description: "Mechanic not found"
+#           schema:
+#             $ref: "#/definitions/Mechanic404Error"
+#             example:
+#               application/json:
+#                 {
+#                   "error": "Mechanic not found."
+#                 }
+    
+#     get:
+#       tags:
+#         - Mechanics - Method Protection -> Mechanic Token
+#       summary: "Get All Mechanics - PROTECTED METHOD - add 'Bearer ' and paste in the mechanic token"
+#       description: "Mechanics/Admin only\n *Example* /mechanics/?page=1&per_page=5"
+
+#       security:
+#         - bearerAuth: []
+
+#       parameters:
+#         - in: query
+#           name: page
+#           type: integer
+#           required: false
+#         - in: query
+#           name: per_page
+#           type: integer
+#           required: false
+
+#       responses:
+#         200:
+#           description: "All mechanics view for mechanics, pagination is optional, "
+#           schema:
+#             $ref: "#/definitions/ViewMechanicsAsMechanic"
+#             example:
+#               application/json:
+#                 [{
+#                   "id": 1,
+#                   "name": "Kyle",
+#                   "email": "kyle@gmail.com",
+#                   "phone": "0123456789"
+#                 },
+#                 {
+#                   "id": integer,
+#                   "name": "Rev",
+#                   "email": "rev@gmail.com",
+#                   "phone": "1234567890"
+#                 }]
+
+#   /mechanics/{mechanic_id}:
+#     get:
+#       tags:
+#         - Mechanics - Method Protection -> Mechanic Token
+#       summary: "Get mechanic by id number - PROTECTED METHOD - add 'Bearer ' and paste in the mechanic token"
+#       description: "Mechanic route to get mechanic by id"
+
+#       security:
+#         - bearerAuth: []
+
+#       parameters:
+#         - in: path
+#           name: mechanic_id
+#           type: integer
+#           required: true
+#           description: "The mechanic ID number"
+
+#       responses:
+#         200:
+#           description: "Mechanic data shown in a successful response"
+#           schema:
+#             $ref: "#/definitions/ViewMechanicAsMechanic"
+#             example:
+#               application/json:
+#                 {
+#                   "id": integer,
+#                   "name": "Kyle",
+#                   "email": "kyle@gmail.com",
+#                   "phone": "0123456789"
+#                 }
+#         404:
+#           description: "Mechanic not found"
+#           schema:
+#             $ref: "#/definitions/Mechanic404Error"
+#             example:
+#               application/json:
+#                 {"error": "Mechanic not found"}
+
+  
+
+
+
+
+
+# definitions: 
+#   LoginCredentials:
+#     type: "object"
+#     properties:
+#       email:
+#         type: "string"
+#       password:
+#         type: "string"
+
+#     required:
+#       - email
+#       - password
+
+#     example:
+#       email: "kyle@gmail.com"
+#       password: "test"
+
+#   LoginResponse:
+#     type: "object"
+#     properties:
+#       auth_token:
+#         type: "string"
+#       message:
+#         type: "string"
+#       status:
+#         type: "string"
+
+#     example:
+#       auth_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTE4MzE0ODEsImlhdCI6MTc1MTgyNzg4MSwic3ViIjoiMSIsInJvbGUiOiJjdXN0b21lciJ9.pCT3Ksn3aVgg8hEChUW1Z9hfDrRXiwnUThXK3gjD_fM"
+#       message: "Successfully Logged In"
+#       status: "success"
+
+#   LoginMessage:
+#     type: "object"
+#     properties:
+#       message:
+#         type: "string"
+#     example:
+#       message: "Username and password required."
+
+#   LoginError:
+#     type: "object"
+#     properties:
+#       error:
+#         type: "string"
+#     example:
+#       error: "Invalid email or password!"
+
+#   CreateCustomerPayload:
+#     type: "object"
+#     properties:
+#       name:
+#         type: "string"
+#       email:
+#         type: "string"
+#       password:
+#         type: "string"
+#       phone:
+#         type: "string"
+#         maxLength: 11
+#     example:
+#       name: "Kyle"
+#       email: "kyle@gmail.com"
+#       password: "test"
+#       phone: "0123456789"
+
+#   CreateCustomerResponse:
+#     type: "object"
+#     properties:
+#       name:
+#         type: "string"
+#       email:
+#         type: "string"
+#       password:
+#         type: "string"
+#       phone:
+#         type: "string"
+#     example:
+#       name: "Kyle"
+#       email: "kyle@gmail.com"
+#       password: "test"
+#       phone: "0123456789"
+
+#   CreateMechanicPayload:
+#     type: "object"
+#     properties:
+#       name:
+#         type: "string"
+#       email:
+#         type: "string"
+#       password:
+#         type: "string"
+#       phone:
+#         type: "string"
+#         maxLength: 11
+#       salary:
+#         type: "integer"
+#     example:
+#       name: "ed"
+#       email: "ed@repairshop.com"
+#       phone: "9719719711"
+#       password: "test1"
+#       salary: 199999.34
+
+#   CreateMechanicResponse:
+#     type: "object"
+#     properties:
+#       name:
+#         type: "string"
+#       email:
+#         type: "string"
+#       password:
+#         type: "string"
+#       phone:
+#         type: "string"
+#     example:
+#       id: 1
+#       name: "ed"
+#       email: "ed@repairshop.com"
+#       phone: "9719719711"
+#       password: "test1"
+#       salary: 199999.34
+
+#   ViewCustomersAsMechanic:
+#     type: array
+#     description: "pagination optional via ?page=*integer*&per_page=*integer*"
+#     items:
+#       $ref: "#/definitions/ViewCustomerAsMechanic"
+#     example:
+#         [
+#           {
+#               "email": "kyle@gmail.com",
+#               "id": 1,
+#               "name": "kyle",
+#               "phone": "9714175138",
+#               "soft_delete": false
+#           },
+#           {
+#               "email": "revel@gmail.com",
+#               "id": 2,
+#               "name": "rev",
+#               "phone": "5033286403",
+#               "soft_delete": true
+#           },
+#           {
+#               "email": "ace@gmail.com",
+#               "id": 3,
+#               "name": "aeslin",
+#               "phone": "9713403030",
+#               "soft_delete": false
+#           },
+#           {
+#               "email": "dummy@gmail.com",
+#               "id": 4,
+#               "name": "dummy",
+#               "phone": "5033286403",
+#               "soft_delete": false
+#           },
+#           {
+#               "email": "jaime@gmail.com",
+#               "id": 5,
+#               "name": "jaime",
+#               "phone": "1234567890",
+#               "soft_delete": false
+#           }
+#         ]
+
+#   ViewCustomerAsMechanic:
+#     type: object
+#     description: "Password not visible to mechanic."
+#     properties:
+#       id:
+#         type: "integer"
+#       name:
+#         type: "string"
+#       email:
+#         type: "string"
+#       phone:
+#         type: "string"
+#     example:
+#       id: 1
+#       name: "Kyle"
+#       email: "kyle@gmail.com"
+#       phone: "0123456789"
+#       soft_delete: false
+
+#   Customer400Message:
+#     type: object
+#     properties: 
+#       message:
+#         type: "string"
+#     example:
+#       message: "'error details' - all customer data fields required."
+
+#   Mechanic400Message:
+#     type: object
+#     properties:
+#       message:
+#         type: "string"
+#     example: 
+#       error: "'error details' - all mechanic data fields required."
+
+#   Customer404Error:
+#     type: object
+#     properties:
+#       error:
+#         type: "string"
+#     example:
+#       error: "Customer not found."
+
+#   Mechanic404Error:
+#     type: object
+#     properties:
+#       error:
+#         type: "string"
+#     example:
+#       error: "Mechanic not found."
+
+
+#   CustomerDeleteResponse:
+#     type: object
+#     properties:
+#       message:
+#         type: "string"
+#     example:
+#       message: "Customer successfully marked for deletion"
+
+# securityDefinitions:
+#   bearerAuth:
+#     type: apiKey
+#     name: Authorization
+#     in: header

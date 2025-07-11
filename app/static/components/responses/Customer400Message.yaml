@@ -1,0 +1,6 @@
+type: object
+properties: 
+  message:
+    type: 'string'
+example:
+  message: "'error details' - all customer data fields required."

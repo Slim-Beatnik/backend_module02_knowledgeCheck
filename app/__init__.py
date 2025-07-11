@@ -9,7 +9,7 @@ from .extensions import cache, limiter, ma
 from .models import ServiceTickets, db, get_vin_length_constraint
 
 SWAGGER_URL = "/api/docs"
-API_URL = "/static/swagger.yaml"
+API_URL = "/static/openapi.yaml"
 
 swaggerui_blueprint = get_swaggerui_blueprint(
     SWAGGER_URL,

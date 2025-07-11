@@ -1,0 +1,18 @@
+ViewCustomerAsMechanic:
+  type: object
+  description: Password not visible to mechanic.
+  properties:
+    id:
+      type: integer
+    name:
+      type: string
+    email:
+      type: string
+    phone:
+      type: string
+  example:
+    id: 1
+    name: 'Kyle'
+    email: 'kyle@gmail.com'
+    phone: '0123456789'
+    soft_delete: false
