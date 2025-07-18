@@ -11,7 +11,8 @@ mechanic_schema = MechanicsSchema()
 mechanics_schema = MechanicsSchema(many=True)
 
 mechanics_on_service_ticket_schema = MechanicsSchema(
-    only=("id", "name", "phone"),
+    only=("name", "phone", "email"),
     many=True,
 )
+
 role_login_schema = MechanicsSchema(only=("email", "password"))

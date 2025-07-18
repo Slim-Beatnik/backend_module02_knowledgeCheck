@@ -59,29 +59,28 @@ class TestCustomer(SuperTest):
             # convert customer1 to Customer object to enter into database
             customer1_obj = Customer(**self.customer1)
             mechanic1_obj = Mechanics(**self.mechanic1)
-            db.session.add(customer1_obj)
-            db.session.add(mechanic1_obj)
+            db.session.add_all([customer1_obj, mechanic1_obj])
             db.session.commit()
         self.token1 = encode_token(1)
         self.mechanic_token1 = encode_token(1, role="mechanic")
         self.client = self.app.test_client()
 
     # =============== UNPROTECTED - BUT LIMITED ============================
-    def test_create_customer(self):
+    def test_create(self):
         customer_payload = self.customer2
         response = self.client.post("/customers/", json=customer_payload)
 
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json["name"], customer_payload["name"])
 
-    def test_existing_create_customer(self):
+    def test_existing_create(self):
         customer_payload = self.customer1
         response = self.client.post("/customers/", json=customer_payload)
 
         self.assertEqual(response.status_code, 401)
         self.assertIn("already", response.json["error"])
 
-    def test_customer_login(self):
+    def test_login(self):
         login_payload = {
             "email": self.customer1["email"],
             "password": self.customer1["password"],
@@ -91,7 +90,7 @@ class TestCustomer(SuperTest):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json["status"], "success")
 
-    def test_invalid_customer_creation(self):
+    def test_invalid_creation(self):
         # payload missing email field
         incomplete_payload = {
             "name": "kyle",
@@ -99,21 +98,19 @@ class TestCustomer(SuperTest):
             "password": "test",
         }
         response = self.client.post("/customers/", json=incomplete_payload)
-
         self.assertEqual(response.status_code, 400)
         self.assertIn("all customer data required", response.json["message"])
 
-    def test_invalid_customer_login(self):
+    def test_invalid_login(self):
         login_payload = {
             "email": self.customer1["email"],
         }
         response = self.client.post("/customers/login", json=login_payload)
-
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json["message"], "Username and password required.")
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual("Invalid email or password!", response.json["error"])
 
     # =================== CUSTOMER TOKEN PROTECTED ===========================
-    def test_update_customer(self):
+    def test_update(self):
         updated_payload = {
             "name": "Kyle",  # changed to uppercase
             "email": "",  # blank strings falsy and aren't reassigned
@@ -133,7 +130,7 @@ class TestCustomer(SuperTest):
         self.assertEqual(response.json["name"], self.updated_customer1["name"])
         self.assertEqual(response.json["phone"], "9876543210")
 
-    def test_invalid_update_customer(self):
+    def test_invalid_update(self):
         # missing email field
         incomplete_payload = {
             "name": "Kyle",
@@ -144,13 +141,13 @@ class TestCustomer(SuperTest):
         customer1_header = {"Authorization": "Bearer " + self.token1}
 
         response = self.client.put(
-            "/customers/", json=incomplete_payload, headers=customer1_header
+            "/customers/", json=incomplete_payload, headers=customer1_header,
         )
 
         self.assertEqual(response.status_code, 400)
         self.assertIn("all customer data fields required.", response.json["message"])
 
-    def test_delete_customer(self):
+    def test_delete(self):
         customer2_obj = Customer(**self.customer2)
         with self.app.app_context():
             db.session.add(customer2_obj)
@@ -163,10 +160,10 @@ class TestCustomer(SuperTest):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            response.json["message"], "Customer successfully marked for deletion"
+            response.json["message"], "Customer successfully marked for deletion",
         )
 
-    def test_get_customer(self):
+    def test_get(self):
         customer2_obj = Customer(**self.customer2)
         with self.app.app_context():
             db.session.add(customer2_obj)
@@ -181,7 +178,7 @@ class TestCustomer(SuperTest):
         self.assertEqual(response.json["name"], "rev")
 
     # ========================= MECHANIC TOKEN PROTECTED ==============================
-    def test_mechanic_get_all_customers(self):
+    def test_mechanic_get_all(self):
         customer2_obj = Customer(**self.customer2)
         with self.app.app_context():
             db.session.add(customer2_obj)
@@ -203,7 +200,7 @@ class TestCustomer(SuperTest):
         self.assertEqual(self.customer1, dict(response.json[0]))
         self.assertEqual(self.customer2, dict(response.json[1]))
 
-    def test_mechanic_get_all_customers_paginated(self):
+    def test_mechanic_get_all_paginated(self):
         customer2_obj = Customer(**self.customer2)
         with self.app.app_context():
             db.session.add(customer2_obj)
@@ -212,7 +209,7 @@ class TestCustomer(SuperTest):
 
         # paginated to view customers 1 at a time, only page 2
         response = self.client.get(
-            "/customers/?page=2&per_page=1", headers=mechanic1_header
+            "/customers/?page=2&per_page=1", headers=mechanic1_header,
         )
 
         # remove password and add id and soft_delete fields to match mechanic_view_customers_schema output
@@ -224,7 +221,7 @@ class TestCustomer(SuperTest):
         self.assertEqual(self.customer2, dict(response.json[0]))
 
     # def test_mechanic_get_customer
-    def test_mechanic_get_customer_by_id(self):
+    def test_mechanic_get_by_id(self):
         mechanic1_header = {"Authorization": "Bearer " + self.mechanic_token1}
 
         response = self.client.get("/customers/1", headers=mechanic1_header)

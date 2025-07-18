@@ -58,7 +58,9 @@ def role_required(f):
             token = request.headers["Authorization"].split(" ")[1]
 
         if not token:
-            return jsonify({"message": "Token is missing or malformed"}), 401
+            return jsonify(
+                {"message": f"{request.headers}\nToken is missing or malformed"}
+            ), 401
 
         try:
             data = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])

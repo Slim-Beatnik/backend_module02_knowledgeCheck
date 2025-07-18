@@ -25,7 +25,9 @@ def create_inventory():
     try:
         inventory_data = inventory_schema.load(request.json)
     except ValidationError as e:
-        return jsonify(e.messages), 400
+        return jsonify(
+            {"message": f"{e.messages} - all inventory fields required"},
+        ), 400
 
     query = select(Inventory).where(
         Inventory.product_name == inventory_data["product_name"],
@@ -34,13 +36,20 @@ def create_inventory():
 
     # opted to handle potential IntegrityError with simple error handling
     if existing_inventory:
-        return jsonify({"error": "Products require unique names for clarity."}), 400
+        return jsonify({"error": "Products require unique names for clarity."}), 401
 
     new_inventory = Inventory(**inventory_data)
 
     db.session.add(new_inventory)
     db.session.commit()
     return inventory_schema.jsonify(new_inventory), 201
+
+
+@inventory_bp.route("/", methods=["GET"])
+@cache.cached(timeout=60)
+@role_required
+def get_inventories():
+    return get_all(Inventory, inventories_schema)
 
 
 # protected for mechanic lookup
@@ -52,14 +61,52 @@ def get_inventory(inventory_id):
 
     if inventory:
         return inventory_schema.jsonify(inventory), 200
-    return jsonify({"error": "Inventory not found."}), 400
+    return jsonify({"error": "Inventory not found."}), 404
 
 
-@inventory_bp.route("/", methods=["GET"])
-@cache.cached(timeout=60)
+# empty input strings required for unchanged information
+@inventory_bp.route("/<int:inventory_id>", methods=["PUT"])
 @role_required
-def get_inventories():
-    return get_all(Inventory, inventories_schema)
+def update_inventory(inventory_id):
+    inventory = db.session.get(Inventory, inventory_id)
+
+    if not inventory:
+        return jsonify({"error": "Inventory not found."}), 404
+
+    try:
+        inventory_data = inventory_schema.load(request.json)
+    except ValidationError as e:
+        return jsonify(
+            {"message": f"{e.messages} - all inventory fields required."},
+        ), 400
+
+    for key, value in inventory_data.items():
+        if value != "":
+            setattr(inventory, key, value)
+
+    db.session.commit()
+    return inventory_schema.jsonify(inventory), 200
+
+
+# soft delete here, with several possible reasons to maintain the record of use
+# in the service tickets for at least a tax year, if recallable products used,
+# or if brand deals are negotiated
+@inventory_bp.route("/<int:inventory_id>", methods=["DELETE"])
+@limiter.limit("50 per month")  # probably not firing over 50 employees
+@role_required
+def delete_inventory(inventory_id):
+    inventory = db.session.get(Inventory, inventory_id)
+
+    if not inventory:
+        return jsonify({"error": "Inventory item not found."}), 404
+
+    inventory.no_longer_used = True
+    db.session.commit()
+    return jsonify(
+        {
+            "message": f"Inventory item id: {inventory_id}, successfully set to no_longer_used.",
+        },
+    ), 200
 
 
 @inventory_bp.route("/current", methods=["GET"])
@@ -69,7 +116,7 @@ def get_current_inventory():
     return get_all(
         Inventory,
         inventories_schema,
-        filter_property=Inventory.no_longer_used,
+        filter_property="no_longer_used",
         filter_value=False,
     )
 
@@ -88,14 +135,17 @@ def search_inventories():
         "any": request.args.get("any"),
     }
 
-    # learned a thing or two about select objects
+    # verify at least one query parameter is provided
+    if not any(v is not None for v in queries.values()):
+        return jsonify({"message": "No search parameters provided."}), 400
+
     # if no values in query select object initialized with customer_id
     stmt = select(Inventory)
     filters = []
 
     # Loop model columns matching provided queries -- skip 'any' and None values
     for key, value in queries.items():
-        if key == "any" or not value:
+        if key == "any" or value is None:
             continue
         if key in Inventory.__table__.columns:
             column = getattr(Inventory, key)
@@ -120,50 +170,11 @@ def search_inventories():
     filtered_inventories = db.session.execute(stmt).scalars().all()
 
     if not filtered_inventories:
-        return jsonify({"message": "Filters failed to yield results."}), 404
+        return jsonify(
+            {"result": [], "message": "Filters failed to yield results."},
+        ), 200
 
     return jsonify(inventories_schema.dump(filtered_inventories)), 200
-
-
-@inventory_bp.route("/<int:inventory_id>", methods=["PUT"])
-@role_required
-def update_inventory(inventory_id):
-    inventory = db.session.get(Inventory, inventory_id)
-
-    if not inventory:
-        return jsonify({"error": "Inventory not found."}), 400
-
-    try:
-        inventory_data = inventory_schema.load(request.json)
-    except ValidationError as e:
-        return jsonify(e.messages), 400
-
-    for key, value in inventory_data.items():
-        setattr(inventory, key, value)
-
-    db.session.commit()
-    return inventory_schema.jsonify(inventory), 200
-
-
-# soft delete here, with several possible reasons to maintain the record of use
-# in the service tickets for at least a tax year, if recallable products used,
-# or if brand deals are negotiated
-@inventory_bp.route("/<int:inventory_id>", methods=["DELETE"])
-@limiter.limit("50 per month")  # probably not firing over 50 employees
-@role_required
-def delete_inventory(inventory_id):
-    inventory = db.session.get(Inventory, inventory_id)
-
-    if not inventory:
-        return jsonify({"error": "Inventory item not found."}), 400
-
-    inventory.no_longer_used = True
-    db.session.commit()
-    return jsonify(
-        {
-            "message": f"Inventory item id: {inventory_id}, successfully set to no_longer_used.",
-        },
-    ), 200
 
 
 # ============== UNPROTECTED SHOPPING ROUTES ===============
@@ -171,7 +182,7 @@ def delete_inventory(inventory_id):
 @inventory_bp.route("/shop", methods=["GET"])
 @cache.cached(timeout=600)
 def shop_get_inventories():
-    return get_all(Inventory, shop_inventories_schema, Inventory.no_longer_used, False)
+    return get_all(Inventory, shop_inventories_schema, "no_longer_used", False)
 
 
 @inventory_bp.route("/shop/product/<int:inventory_id>", methods=["GET"])
@@ -182,7 +193,7 @@ def shop_get_inventory(inventory_id):
         return jsonify({"message": "We no longer carry this item."})
     if inventory:
         return shop_inventory_schema.jsonify(inventory), 200
-    return jsonify({"error": "Item not found."}), 400
+    return jsonify({"error": "Item not found."}), 404
 
 
 @inventory_bp.route("/shop/search", methods=["GET"])
@@ -194,14 +205,17 @@ def shop_search_inventories():
         "any": request.args.get("any"),
     }
 
+    if not any(v is not None for v in queries.values()):
+        return jsonify({"message": "No search parameters provided."}), 400
+
     # learned a thing or two about select objects
     # if no values in query select object initialized with customer_id
     stmt = select(Inventory)
-    filters = [Inventory.no_longer_used.is_(False)]
+    filters = [Inventory.no_longer_used == False]
 
     # Loop model columns matching provided queries -- skip 'any' and None values
     for key, value in queries.items():
-        if key == "any" or not value:
+        if key == "any" or value is None:
             continue
         if key in Inventory.__table__.columns:
             column = getattr(Inventory, key)
@@ -223,6 +237,8 @@ def shop_search_inventories():
     filtered_inventories = db.session.execute(stmt).scalars().all()
 
     if not filtered_inventories:
-        return jsonify({"message": "Filters failed to yield results."}), 404
+        return jsonify(
+            {"result": [], "message": "Filters failed to yield results."}
+        ), 200
 
     return jsonify(shop_inventories_schema.dump(filtered_inventories)), 200

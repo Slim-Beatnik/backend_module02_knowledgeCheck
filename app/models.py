@@ -117,8 +117,9 @@ def get_all(table_class, many_schema, filter_property=None, filter_value=None):
         page = request.args.get("page", 1, type=int)
         per_page = request.args.get("per_page", 10, type=int)
         query = select(table_class)
-        if filter_property and filter_value:
-            query = query.filter_by(filter_property.is_(filter_value))
+        if filter_property is not None and filter_value is not None:
+            column = getattr(table_class, filter_property)
+            query = query.filter(column == filter_value)
         output_obj = db.paginate(query, page=page, per_page=per_page)
         return many_schema.jsonify(output_obj), 200
     except:  # noqa: E722

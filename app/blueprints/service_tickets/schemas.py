@@ -33,6 +33,12 @@ class EditInventorySchema(ma.Schema):
 
 service_ticket_schema = ServiceTicketsSchema()
 service_tickets_schema = ServiceTicketsSchema(many=True)
+
 edit_assigned_mechanics_schema = EditAssignedMechanicsSchema()
 edit_inventory_schema = EditInventorySchema()
-return_service_ticket_schema = ServiceTicketsSchema(exclude=["customer_id"])
+
+# customers have no specific use for seeing their id
+customer_receipt_service_tickets_schema = ServiceTicketsSchema(
+    exclude=["customer_id"],
+    many=True,
+)

@@ -25,12 +25,13 @@ from .schemas import (
 
 
 @mechanics_bp.route("/", methods=["POST"])
-@limiter.limit("5 per month")
 def create_mechanic():
     try:
         mechanic_data = mechanic_schema.load(request.json)
     except ValidationError as e:
-        return jsonify(e.messages, "all data fields required"), 400
+        return jsonify(
+            {"message": f"'{e.messages} ' - all mechanic data fields required"},
+        ), 400
 
     new_mechanic = Mechanics(**mechanic_data)
     db.session.add(new_mechanic)
@@ -52,9 +53,9 @@ def login():
         credentials = role_login_schema.load(request.json)
         username = credentials["email"]
         password = credentials["password"]
-    except KeyError:
+    except (KeyError, ValidationError) as e:
         return jsonify(
-            {"messages": "Username and password required."},
+            {"messages": f"{e.messages} - Username and password required."},
         ), 400
 
     query = select(Mechanics).where(Mechanics.email == username)
@@ -89,9 +90,11 @@ def get_mechanics():
 @mechanics_bp.route("/top-mechanics", methods=["GET"])
 def get_top_mechanics():
     limit = request.args.get("limit")
+
     count_st_id = func.Count(
         service_tickets_has_mechanics.c.service_ticket_id,
     )
+
     stmt = (
         select(
             Mechanics,
@@ -106,8 +109,10 @@ def get_top_mechanics():
         )
         .limit(limit or 3)
     )
+
     results = db.session.execute(stmt).all()
     top_mechanics = {}
+
     for index, (mechanic, ticket_count) in enumerate(results):
         top_mechanics[index + 1] = {
             "name": mechanic.name,
@@ -122,21 +127,30 @@ def update_mechanic(mechanic_id):
     mechanic = db.session.get(Mechanics, mechanic_id)
 
     if not mechanic:
-        return jsonify({"error": "Mechanic not found."}), 400
+        return jsonify({"error": "Mechanic not found."}), 404
+
+    mechanic_data = request.json
 
     try:
-        mechanic_data = mechanic_schema.load(request.json)
-        if not any(mechanic_data.values()):
-            return jsonify({"message": "No changes made"})
-    except ValidationError as e:
+        cleaned_data = {
+            "name": mechanic_data["name"],
+            "email": mechanic_data["email"],
+            "password": mechanic_data["password"],
+            "phone": mechanic_data["phone"],
+            "salary": mechanic_data["salary"],
+        }
+    except KeyError as e:
         return jsonify(
-            {"message": f"{e.messages} - all mechanic data fields required."},
+            {"message": f"{e} - all mechanic data fields required"},
         ), 400
 
-    for key, value in mechanic_data.items():
+    if cleaned_data and not any(cleaned_data.values()):
+        return jsonify({"message": "No changes made"}), 422
+
+    for key, value in cleaned_data.items():
         if value:
             setattr(mechanic, key, value)
-
+    db.session.add(mechanic)
     db.session.commit()
     return mechanic_schema.jsonify(mechanic), 200
 
@@ -152,13 +166,16 @@ def search_for_customer():
         "any": request.args.get("any"),
     }
 
+    if not any(v is not None for v in queries.values()):
+        return jsonify({"message": "No search parameters provided."}), 400
+
     # search non-deleted customers
-    stmt = select(Customer).where(Customer.soft_delete.is_(False))
+    stmt = select(Customer).where(Customer.soft_delete == False)
     filters = []
 
     # Loop model columns matching provided queries -- skip 'any' and None values
     for key, value in queries.items():
-        if key == "any" or not value:
+        if key == "any" or value is None:
             continue
         if key in Customer.__table__.columns:
             column = getattr(Customer, key)
@@ -169,6 +186,7 @@ def search_for_customer():
         qry = f"%{queries['any']}%"
         filters.append(
             or_(
+                Customer.id.like(qry),
                 Customer.name.like(qry),
                 Customer.email.like(qry),
                 Customer.phone.like(qry),
@@ -181,7 +199,9 @@ def search_for_customer():
     filtered_customers = db.session.execute(stmt).scalars().all()
 
     if not filtered_customers:
-        return jsonify({"message": "Filters failed to yield results."}), 404
+        return jsonify(
+            {"result": [], "message": "Filters failed to yield results."},
+        ), 200
 
     return jsonify(
         {
@@ -201,13 +221,16 @@ def search_for_deleted_customer():
         "any": request.args.get("any"),
     }
 
+    if not any(v is not None for v in queries.values()):
+        return jsonify({"message": "No search parameters provided."}), 400
+
     # search non-deleted customers
-    stmt = select(Customer).where(Customer.soft_delete.is_(True))
+    stmt = select(Customer).where(Customer.soft_delete == True)
     filters = []
 
     # Loop model columns matching provided queries -- skip 'any' and None values
     for key, value in queries.items():
-        if key == "any" or not value:
+        if key == "any" or value is None:
             continue
         if key in Customer.__table__.columns:
             column = getattr(Customer, key)
@@ -230,7 +253,9 @@ def search_for_deleted_customer():
     filtered_customers = db.session.execute(stmt).scalars().all()
 
     if not filtered_customers:
-        return jsonify({"message": "Filters failed to yield results."}), 404
+        return jsonify(
+            {"result": [], "message": "Filters failed to yield results."},
+        ), 200
 
     return jsonify(
         {
@@ -246,7 +271,7 @@ def delete_mechanics(mechanics_id):
     mechanic = db.session.get(Mechanics, mechanics_id)
 
     if not mechanic:
-        return jsonify({"error": "Mechanic not found."}), 400
+        return jsonify({"error": "Mechanic not found."}), 404
 
     db.session.delete(mechanic)
     db.session.commit()

@@ -27,8 +27,8 @@ def login():
         password = credentials["password"]
     except (KeyError, ValueError, ValidationError):
         return jsonify(
-            {"message": "Username and password required."},
-        ), 400
+            {"error": "Invalid email or password!"},
+        ), 401
 
     query = select(Customer).where(Customer.email == username)
     customer = db.session.execute(
@@ -91,7 +91,7 @@ def update_customer(customer_id):
     try:
         customer_data = customer_schema.load(request.json)
         if not any(customer_data.values()):
-            return jsonify({"message": "No changes made"})
+            return jsonify({"message": "No changes made"}), 422
     except ValidationError as e:
         return jsonify(
             {"message": f"{e.messages} - all customer data fields required."},
