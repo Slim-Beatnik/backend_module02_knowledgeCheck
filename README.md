@@ -34,53 +34,7 @@
     <img src="images/logo.png" alt="Logo" width="80" height="80">
   </a>
 
-```text
-  Directory structure:
-  └── slim-beatnik-backend_module02_knowledgecheck/
-      ├── README.md
-      ├── app.py
-      ├── config.py
-      ├── db_test_environment.postman_environment.json
-      ├── LICENSE.txt
-      ├── package.json
-      ├── project_tree
-      ├── project_tree.txt
-      ├── pyproject.toml
-      ├── repair_shop_db.postman_collection.json
-      ├── requirements.txt
-      ├── uv.lock
-      ├── .python-version
-      ├── app/
-      │   ├── __init__.py
-      │   ├── extensions.py
-      │   ├── models.py
-      │   ├── blueprints/
-      │   │   ├── customer/
-      │   │   │   ├── __init__.py
-      │   │   │   ├── routes.py
-      │   │   │   └── schemas.py
-      │   │   ├── inventory/
-      │   │   │   ├── __init__.py
-      │   │   │   ├── routes.py
-      │   │   │   └── schemas.py
-      │   │   ├── mechanics/
-      │   │   │   ├── __init__.py
-      │   │   │   ├── routes.py
-      │   │   │   └── schemas.py
-      │   │   └── service_tickets/
-      │   │       ├── __init__.py
-      │   │       ├── routes.py
-      │   │       └── schemas.py
-      │   ├── static/
-      │   │   └── swagger.yaml
-      │   └── utils/
-      │       └── util.py
-      └── tests/
-          ├── test_customer.py
-          ├── test_inventory.py
-          ├── test_mechanics.py
-          └── test_service_tickets.py
-```
+See project_tree.txt for the directory layout
 
 <h3 align="center">Repair Shop DB</h3>
 
