@@ -34,8 +34,7 @@
     <img src="images/logo.png" alt="Logo" width="80" height="80">
   </a>
 
-<pre><code>
-  ```text
+```text
   Directory structure:
   └── slim-beatnik-backend_module02_knowledgecheck/
       ├── README.md
@@ -81,8 +80,7 @@
           ├── test_inventory.py
           ├── test_mechanics.py
           └── test_service_tickets.py
-  ```
-</code></pre>
+```
 
 <h3 align="center">Repair Shop DB</h3>
 
