@@ -178,7 +178,8 @@ class TestInventory(SuperTest):
             db.session.add(ServiceTickets(**s2))
             db.session.commit()
         response = self.client.get(
-            "/service_tickets/?page=2&per_page=1", headers=self.mechanic1_header
+            "/service_tickets/?page=2&per_page=1",
+            headers=self.mechanic1_header,
         )
 
         self.assertEqual(response.status_code, 200)
@@ -243,7 +244,7 @@ class TestInventory(SuperTest):
 
         response = self.client.put(
             "/service_tickets/1/edit-inventory",
-            json={"add_inventory_ids": [1], "remove_inventory_ids": []},
+            json={"add_inventory_ids": [1, 2], "remove_inventory_ids": []},
             headers=self.mechanic1_header,
         )
         expected_response_obj["inventories"] = [
@@ -251,8 +252,28 @@ class TestInventory(SuperTest):
                 "product_name": "High Milage Oil - HOUSE",
                 "price": 15.43,
             },
+            {
+                "product_name": "Regular Oil - HOUSE",
+                "price": 12.24,
+            },
         ]
         expected_response_obj["service_date"] = "2023-10-01"
+
+        self.assertEqual(response.status_code, 200)
+        self.assertDictEqual(expected_response_obj, dict(response.json))
+
+        # verify inventory can be removed w/o error
+        response = self.client.put(
+            "/service_tickets/1/edit-inventory",
+            json={"add_inventory_ids": [], "remove_inventory_ids": [1]},
+            headers=self.mechanic1_header,
+        )
+        expected_response_obj["inventories"] = [
+            {
+                "product_name": "Regular Oil - HOUSE",
+                "price": 12.24,
+            },
+        ]
 
         self.assertEqual(response.status_code, 200)
         self.assertDictEqual(expected_response_obj, dict(response.json))

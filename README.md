@@ -30,86 +30,58 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/Slim-Beatnik/backend_module01_project">
+  <a href="https://github.com/Slim-Beatnik/backend_module02_knowledgeCheck">
     <img src="images/logo.png" alt="Logo" width="80" height="80">
   </a>
 
 <h3 align="center">Repair Shop DB</h3>
 
   <p align="center">
-If you have been following along with the practice assignments your Mechanic API should have the following.
+Documentation:
+Utilizing Flask-Swagger and Flask-Swagger-UI Document Each Route of your API. Each Route Requires:
 
-Rate Limiting and Caching:
-Using the Flask-Limiter package, have a rate limit applied to at least one route in your API
-Using the Flask-Caching package, have implemented caching on at least on route in your API
-(Additional Optional Challenge): Apply a default rate limit to your project, offering blanket protection to all routes. Feel free to dive into the Flask-Limiter docs to figure this out: https://flask-limiter.readthedocs.io/en/stable/
+Path:
+Endpoint
+Type of request (post, get, put, delete)
+tag (category for the route)
+summary
+description
+security: Points to the security definition (Only need this for token authenticated routes)
+parameters: Information about what the data the route requires(Only required for POST and PUT request)
+responses: Information about what the data  route returns (Should include examples)
+Definition(s):
+PayloadDefinition: Defines the "Shape" of the incoming data (Only required for POST and PUT requests)
+ResponseDefinitions: Defines the "Shape" of the outgoing data 
+Testing:
 
-Token Authentication: requires python-jose package.
-Create an encode_token function that takes in a customer_id to create a token specific to that user.
-login_schema, which can be made by excluding all fields except email and password from your CustomerSchema
-In your customer blueprint, create a login route:
----- POST '/login' : passing in email and password, validated by login_schema
----- After credentials have been validate utilizes the encode_token() function to make a token to be returned to that customer.
-Create @token_required wrapper, that validates the token and returns the customer_id to the function it's decorating.
-Create a route that requires a token, that returns the service_tickets related to that customer.
----- GET '/my-tickets': requires a Bearer Token authorization.
----- The route function should receive the customer_id from the @token_required wrapper.
----- Using that id query the service_tickets where the customer_id is equal to the id passed in.
-Additionally add @token_required to any routes you think should require authorization. (ex: Update, Delete,...)
-(Additonal Optional Challenge): Create a login route for mechanics, which uses a separate function to encode tokens specifically for mechanics (Hint: add a field to the token payload). Additionally create another wrapper that checks the token for that field when authorizing. Apply this wrapper to relevant Mechanics and Inventory routes (What routes should a mechanic be required to be logged in for).
-Advanced Queries:
-Add an update route to your service_ticket blueprint to add and remove mechanics from a ticket.
----- PUT '/<int:ticket_id>/edit' : Takes in remove_ids, and add_ids
----- Use id's to look up the mechanic to append or remove them from the ticket.mechanics list
-Create an endpoint in mechanics blueprint that returns a list of mechanics in order of who has worked on the most tickets
-Apply Pagination to GET Customers route.
-Assignment Continuation:
+Utilizing the built-in unittest library:
+Create a tests folder inside you project folder
+Create a test file for each of your blueprints (test_mechanics.py, test_customers.py, etc.) inside the tests folder
+Create one test for every route in your API.
+incorporate negative tests in your testing.
+run your tests with: 
 
-Incorporating a new resource to the API, we are now going to track inventory.
+Windows: python -m unittest discover tests
+Mac: : python -m unittest discover tests
 
-Inventory Model:
-Create a new Inventory model in models.py which includes the following fields:
-id: Unique Identifier
-name: Part name
-price: float value (price of the part)
-Many-to-Many Relationship:
-Establish a many-to-many relationship from Inventory to ServiceTicket, as One ticket can require many parts, and the same kind of part can be used on many different tickets.
-
-The junction table does not have to support any additional fields, and can be a simple table object similar to your service_mechanic table. 
-
-(Additional Optional Challenge): Make the junction table a Model object with additional field of quantity.
-
-Inventory Blueprint:
-Create a new folder in blueprints for Inventory:
-Initialize the blueprint (don't forget to import routes under the blueprint initialization)
-Register the blueprint with a url_prefix = '/inventory'
-Create a Schema for Inventory (use SQLAlchemyAutoSchema to generate schema from Inventory Model)
-Inventory Routes:
-For inventory implement basic CRUD routes to Create, Read, Update, and Delete parts stored in our inventory. 
-
-Additionally Create a route in the service_ticket blueprint to add a single part to an existing Service Ticket.
-
-Testing and Submission:
-
-Test all routes in Postman to ensure each endpoint works as designed. In Postman add every test request to a collection, and export that collection to your API project folder. Push your work to Github and submit the link to the GitHub repo.
+Check out the API documentation by running the app:
+```sh
+  python a
 
 Presenting
 All students who joined Coding Temple February and onward need to present there project either on Thursdays or Friday live sessions, or you can schedule a 1-on-1 with Dylan to present.
 For Pre-February students you are still encouraged to present as it is a great way to build you Tech-Communication skills which are a must.
 
-Bonus features completed:
-@role_required decorator added. It has a role in the payload, and protects mechanic routes.
-
 
     <br />
-    <a href="https://github.com/Slim-Beatnik/backend_module01_project"><strong>Explore the docs »</strong></a>
+    <a href="https://github.com/Slim-Beatnik/backend_module02_knowledgeCheck"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/Slim-Beatnik/backend_module01_project">View Demo</a>
+    <a href="https://github.com/Slim-Beatnik/backend_module02_knowledgeCheck">View Demo</a>
     &middot;
-    <a href="https://github.com/Slim-Beatnik/backend_module01_project/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
+    <a href="https://github.com/Slim-Beatnik/backend_module02_knowledgeCheck/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
     &middot;
-    <a href="https://github.com/Slim-Beatnik/backend_module01_project/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
+    <a href="https://github.com/Slim-Beatnik/backend_module02_knowledgeCheck/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
   </p>
 </div>
 
@@ -173,14 +145,13 @@ To get a local copy up and running follow these simple example steps.
 
 ### Installation
 
-1. Get a free API Key at [https://example.com](https://example.com)
-2. Clone the repo
+1. Clone the repo
    ```sh
-   git clone https://github.com/Slim-Beatnik/backend_module01_project.git
+   git clone https://github.com/Slim-Beatnik/backend_module02_knowledgeCheck.git
    ```
 2. Change git remote url to avoid accidental pushes to base project
    ```sh
-   git remote set-url origin Slim-Beatnik/backend_module01_project
+   git remote set-url origin Slim-Beatnik/backend_module02_knowledgeCheck
    git remote -v # confirm the changes
    ```
 3. Create a virtual environment
@@ -188,19 +159,35 @@ To get a local copy up and running follow these simple example steps.
    python -m venv venv
    python3 -m venv venv
    ```
-4. Activate the virtual environment
-   ```sh
-   venv\\Scripts\\Activate
-   source venv/bin/activate
-   ```
-5. Install dependencies:
+4. Install dependencies:
   pip: ```sh
     pip install -r requirements.txt
   ```
+  OR
   uv: ```sh
         uv sync
       ```
+5. run app on windows or mac
+  pip:
+   ```sh
+   venv\\Scripts\\Activate
+   source venv/bin/activate
+  ```
+  Windows:
+  ```sh
+   python app.py
+   ```
+  Mac:
+  ```sh
+   python3 app.py
+  ```
 
+OR
+
+  uv:
+  ```sh
+   uv run app.py
+```
   Postman setup:
   repair_shop_db.postman_collection.json must run in the db_test_environment.postman_environment.json
   - if you're out of free collection runs -
@@ -211,17 +198,22 @@ To get a local copy up and running follow these simple example steps.
   ```
 
   then use uv run app.py
-6. Bonus ********
-  if you're using uv, check out ruff
-  Corey Shafer Youtube video: https://www.youtube.com/watch?v=828S-DMQog8
 
-7. Verify paths in Postman:
+6. Verify paths in Postman:
   import repairshop_db.postman_collection.json
   You can then run all, or split up your run by folder.
   There is a main folder for creation:
   C___
   And another folder for read, update and delete:
   _RUD
+
+8. 
+  Open a browser and go to [/api/docs](http://127.0.0.1:5000/api/docs/)
+  This will open the swagger doc and show api calls based on their tags:
+  Customer, Inventory, Mechanics, ServiceTickets, Method Protection → Customer Token, and Method Protection → Mechanic Token
+
+  *If visit this site before running the postman document, remember to create customers, inventory items, mechanics and service tickets before attempting to use any other methods.
+  **Note - it won't break anything, IT WILL simply return 4xx response codes.
 
 Notes:
   several deletes are soft-deletes with intent -
@@ -234,6 +226,24 @@ Notes:
 
   Both Mechanics and Inventory objects can be associated with a service ticket with add and remove id_lists
 
+
+Features and heartbreak:
+
+1.  Creating a flushed out version of the app with testing has lead to some interesting issues.
+The ServiceTicket class Model is now created without the constraint.
+MySQL vs. sqlite, has a unique response while using sqlalchemy's CheckConstraint.
+MySQL uses CHAR_LENGTH() while sqlite uses LENGTH()
+
+  The work around was to add a conditional helper function within the models.py file, import it into the __init__.py file, where the create_app function lives.
+  Once the app is created we can use app_context to extract the different versions of database handling using db.engine.dialect.name
+  From there it plugs in the helper function and uses the conditional to append_constraint to the table allowing the appropriate function for the CheckConstraint function.
+
+2. The assignment was set up in such a way that it makes me feel like I'm being shown what not to do as much as I am being shown how to do it properly.
+  With the appropriate planning, I would have created routes, created tests, and the swagger documentation simultaneously.
+  Instead the assignment build out every route before, for this knowledge check, simultaneously writing the documentation and testing, all while refactoring the weaker functions.
+  This is a valuable lesson, but further, infuriating.
+  
+  I submit myself to more rigorous creation and planning going forward.
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
@@ -252,7 +262,7 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 <!-- ROADMAP -->
 ## Roadmap
 
-See the [open issues](https://github.com/Slim-Beatnik/backend_module01_project/issues) for a full list of proposed features (and known issues).
+See the [open issues](https://github.com/Slim-Beatnik/backend_module02_knowledgeCheck/issues) for a full list of proposed features (and known issues).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -276,8 +286,8 @@ Don't forget to give the project a star! Thanks again!
 
 ### Top contributors:
 
-<a href="https://github.com/Slim-Beatnik/backend_module01_project/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=Slim-Beatnik/backend_module01_project" alt="contrib.rocks image" />
+<a href="https://github.com/Slim-Beatnik/backend_module02_knowledgeCheck/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=Slim-Beatnik/backend_module02_knowledgeCheck" alt="contrib.rocks image" />
 </a>
 
 
@@ -296,7 +306,7 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 
 Your Name - [@twitter_handle](https://twitter.com/twitter_handle) - totem64@gmail.com.com
 
-Project Link: [https://github.com/Slim-Beatnik/backend_module01_project](https://github.com/Slim-Beatnik/backend_module01_project)
+Project Link: [https://github.com/Slim-Beatnik/backend_module02_knowledgeCheck](https://github.com/Slim-Beatnik/backend_module02_knowledgeCheck)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -315,32 +325,16 @@ Project Link: [https://github.com/Slim-Beatnik/backend_module01_project](https:/
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/Slim-Beatnik/backend_module01_project.svg?style=for-the-badge
-[contributors-url]: https://github.com/Slim-Beatnik/backend_module01_project/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/Slim-Beatnik/backend_module01_project.svg?style=for-the-badge
-[forks-url]: https://github.com/Slim-Beatnik/backend_module01_project/network/members
-[stars-shield]: https://img.shields.io/github/stars/Slim-Beatnik/backend_module01_project.svg?style=for-the-badge
-[stars-url]: https://github.com/Slim-Beatnik/backend_module01_project/stargazers
-[issues-shield]: https://img.shields.io/github/issues/Slim-Beatnik/backend_module01_project.svg?style=for-the-badge
-[issues-url]: https://github.com/Slim-Beatnik/backend_module01_project/issues
-[license-shield]: https://img.shields.io/github/license/Slim-Beatnik/backend_module01_project.svg?style=for-the-badge
-[license-url]: https://github.com/Slim-Beatnik/backend_module01_project/blob/master/LICENSE.txt
+[contributors-shield]: https://img.shields.io/github/contributors/Slim-Beatnik/backend_module02_knowledgeCheck.svg?style=for-the-badge
+[contributors-url]: https://github.com/Slim-Beatnik/backend_module02_knowledgeCheck/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/Slim-Beatnik/backend_module02_knowledgeCheck.svg?style=for-the-badge
+[forks-url]: https://github.com/Slim-Beatnik/backend_module02_knowledgeCheck/network/members
+[stars-shield]: https://img.shields.io/github/stars/Slim-Beatnik/backend_module02_knowledgeCheck.svg?style=for-the-badge
+[stars-url]: https://github.com/Slim-Beatnik/backend_module02_knowledgeCheck/stargazers
+[issues-shield]: https://img.shields.io/github/issues/Slim-Beatnik/backend_module02_knowledgeCheck.svg?style=for-the-badge
+[issues-url]: https://github.com/Slim-Beatnik/backend_module02_knowledgeCheck/issues
+[license-shield]: https://img.shields.io/github/license/Slim-Beatnik/backend_module02_knowledgeCheck.svg?style=for-the-badge
+[license-url]: https://github.com/Slim-Beatnik/backend_module02_knowledgeCheck/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/3dkylehill
 [product-screenshot]: images/screenshot.png
-[Next.js]: https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white
-[Next-url]: https://nextjs.org/
-[React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
-[React-url]: https://reactjs.org/
-[Vue.js]: https://img.shields.io/badge/Vue.js-35495E?style=for-the-badge&logo=vuedotjs&logoColor=4FC08D
-[Vue-url]: https://vuejs.org/
-[Angular.io]: https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white
-[Angular-url]: https://angular.io/
-[Svelte.dev]: https://img.shields.io/badge/Svelte-4A4A55?style=for-the-badge&logo=svelte&logoColor=FF3E00
-[Svelte-url]: https://svelte.dev/
-[Laravel.com]: https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white
-[Laravel-url]: https://laravel.com
-[Bootstrap.com]: https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white
-[Bootstrap-url]: https://getbootstrap.com
-[JQuery.com]: https://img.shields.io/badge/jQuery-0769AD?style=for-the-badge&logo=jquery&logoColor=white
-[JQuery-url]: https://jquery.com 

@@ -1304,9 +1304,7 @@ paths:
           name: "body"
           required: true
           schema:
-            type: array
-            items:
-              type: integer
+            $ref: "#/definitions/EditMechanicsOnServiceTicket"
 
       responses:
         200:
@@ -1342,9 +1340,7 @@ paths:
           name: "body"
           required: true
           schema:
-            type: array
-            items:
-              type: integer
+            $ref: "#/definitions/EditInventoryOnServiceTicket"
 
       responses:
         200:
@@ -1581,7 +1577,32 @@ definitions:
         "vin": "abcdefghijklmnop9"
       }
 
-  
+  EditInventoryOnServiceTicket:
+    type: object
+    properties:
+      add_inventory_ids:
+        type: array
+        items:
+          type: integer
+      remove_inventory_id:
+        type: integer
+    example:
+      add_inventory_ids: [1, 2]
+      remove_inventory_id: [3]
+
+  EditMechanicsOnServiceTicket:
+    type: object
+    properties:
+      add_mechanic_ids:
+        type: array
+        items:
+          type: integer
+      remove_mechanic_id:
+        type: integer
+    example:
+      add_mechanic_ids: [1, 2]
+      remove_mechanic_id: [3]
+
   ViewCustomerAsMechanic:
     type: object
     description: "Password not visible to mechanic."

@@ -1,5 +1,3 @@
-from datetime import date
-
 from flask import g, jsonify, request
 from marshmallow import ValidationError
 from sqlalchemy import or_, select
